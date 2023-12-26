@@ -7,7 +7,7 @@ test:
 
 .PHONY: bin
 bin: fmt vet
-	go build -o bin/{{ .PluginName }} github.com/{{ .Owner }}/{{ .Repo }}/cmd/plugin
+	go build -o bin/clog github.com/orangetangerine/kubectl-clog/cmd/plugin
 
 .PHONY: fmt
 fmt:

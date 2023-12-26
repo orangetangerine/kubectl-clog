@@ -1,32 +1,24 @@
 package plugin
 
 import (
-	"fmt"
+	"context"
+	"os"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/cli-runtime/pkg/genericiooptions"
+	cmdlogs "k8s.io/kubectl/pkg/cmd/logs"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-func RunPlugin(configFlags *genericclioptions.ConfigFlags, outputCh chan string) error {
-	config, err := configFlags.ToRESTConfig()
-	if err != nil {
-		return fmt.Errorf("failed to read kubeconfig: %w", err)
-	}
+func ioStreams() genericiooptions.IOStreams {
+	return genericiooptions.IOStreams{In: os.Stdin, Out: defaultWriter(), ErrOut: os.Stderr}
+}
 
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return fmt.Errorf("failed to create clientset: %w", err)
-	}
+func RunPlugin(_ context.Context) error {
+	cf := genericclioptions.NewConfigFlags(false)
+	f := cmdutil.NewFactory(cf)
+	cmdLog := cmdlogs.NewCmdLogs(f, ioStreams())
 
-	namespaces, err := clientset.CoreV1().Namespaces().List(metav1.ListOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to list namespaces: %w", err)
-	}
-
-	for _, namespace := range namespaces.Items {
-		outputCh <- fmt.Sprintf("Namespace %s", namespace.Name)
-	}
-
-	return nil
+	cf.AddFlags(cmdLog.Flags())
+	return cmdLog.Execute()
 }
