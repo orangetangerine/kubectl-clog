@@ -2,8 +2,6 @@ module github.com/orangetangerine/kubectl-clog
 
 go 1.21
 
-toolchain go1.21.0
-
 require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/fatih/color v1.16.0
