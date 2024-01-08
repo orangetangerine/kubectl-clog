@@ -31,10 +31,14 @@ func (f *istioLogFilter) FilteringLine(s string, log Logger) (int, error) {
 		return 0, err
 	}
 
+	idx := strings.Index(s, httpCode)
+
+	levelTag := httpCode
 	if strings.HasPrefix(httpCode, "2") || strings.HasPrefix(httpCode, "3") {
-		s = strings.Join(ss[:4], " ") + " " + log.WrapBgInfo(httpCode) + " " + strings.Join(ss[5:], " ")
-		return log.Println(s)
+		levelTag = log.WrapBgInfo(httpCode)
+	} else {
+		levelTag = log.WrapBgError(httpCode)
 	}
-	s = strings.Join(ss[:4], " ") + " " + log.WrapBgError(httpCode) + " " + strings.Join(ss[5:], " ")
-	return log.Println(s)
+
+	return log.Println(s[:idx] + levelTag + s[idx+len(httpCode):])
 }
