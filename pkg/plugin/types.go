@@ -28,4 +28,5 @@ type Logger interface {
 	WrapFgWarn(msg string) string
 	WrapFgInfo(msg string) string
 	WrapFgDebug(msg string) string
+	WrapFgTimestamp(msg string) string
 }
