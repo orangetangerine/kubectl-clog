@@ -27,10 +27,11 @@ var _ io.Writer = (*ColorizeWriter)(nil)
 type ColorizeWriter struct {
 	noColorWriter colorize
 
-	errorFg colorize
-	warnFg  colorize
-	infoFg  colorize
-	debugFg colorize
+	errorFg     colorize
+	warnFg      colorize
+	infoFg      colorize
+	debugFg     colorize
+	timestampFg colorize
 
 	errorBg colorize
 	warnBg  colorize
@@ -42,18 +43,20 @@ type ColorizeWriter struct {
 
 func defaultWriter() *ColorizeWriter {
 	return &ColorizeWriter{
-		errorFg: colorize{*color.New(color.FgHiRed)},
-		warnFg:  colorize{*color.New(color.FgHiYellow)},
-		infoFg:  colorize{*color.New(color.FgHiCyan)},
-		debugFg: colorize{ /*Color: *color.New(color.FgHiWhite*/ },
-		errorBg: colorize{*color.New(color.BgRed, color.Bold)},
-		warnBg:  colorize{*color.New(color.BgYellow, color.Bold)},
-		infoBg:  colorize{*color.New(color.BgCyan, color.Bold)},
-		debugBg: colorize{*color.New(color.BgWhite, color.Bold)},
+		errorFg:     colorize{*color.New(color.FgHiRed)},
+		warnFg:      colorize{*color.New(color.FgHiYellow)},
+		infoFg:      colorize{*color.New(color.FgHiCyan)},
+		debugFg:     colorize{ /*Color: *color.New(color.FgHiWhite*/ },
+		timestampFg: colorize{*color.New(color.FgHiBlue)},
+		errorBg:     colorize{*color.New(color.BgRed, color.Bold)},
+		warnBg:      colorize{*color.New(color.BgYellow, color.Bold)},
+		infoBg:      colorize{*color.New(color.BgCyan, color.Bold)},
+		debugBg:     colorize{*color.New(color.BgWhite, color.Bold)},
 		contentFilters: []ContentFilter{
 			&pureJsonLogFilter{},
 			&envoyLogFilter{},
 			&istioLogFilter{},
+			&plaintextLogFilter{},
 		},
 	}
 }
@@ -73,10 +76,11 @@ func (c *ColorizeWriter) WrapBgWarn(s string) string  { return c.warnBg.Sprint(s
 func (c *ColorizeWriter) WrapBgInfo(s string) string  { return c.infoBg.Sprint(s) }
 func (c *ColorizeWriter) WrapBgDebug(s string) string { return c.debugBg.Sprint(s) }
 
-func (c *ColorizeWriter) WrapFgError(s string) string { return c.errorFg.Color.Sprint(s) }
-func (c *ColorizeWriter) WrapFgWarn(s string) string  { return c.warnFg.Color.Sprint(s) }
-func (c *ColorizeWriter) WrapFgInfo(s string) string  { return c.infoFg.Color.Sprint(s) }
-func (c *ColorizeWriter) WrapFgDebug(s string) string { return c.debugFg.Color.Sprint(s) }
+func (c *ColorizeWriter) WrapFgError(s string) string     { return c.errorFg.Color.Sprint(s) }
+func (c *ColorizeWriter) WrapFgWarn(s string) string      { return c.warnFg.Color.Sprint(s) }
+func (c *ColorizeWriter) WrapFgInfo(s string) string      { return c.infoFg.Color.Sprint(s) }
+func (c *ColorizeWriter) WrapFgDebug(s string) string     { return c.debugFg.Color.Sprint(s) }
+func (c *ColorizeWriter) WrapFgTimestamp(s string) string { return c.timestampFg.Color.Sprint(s) }
 
 func (c *ColorizeWriter) colorize(buf *bytes.Buffer) (int, error) {
 	ss := strings.Split(buf.String(), "\n")
